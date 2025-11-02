@@ -10,6 +10,9 @@ import UserTypeSelection from "@/pages/UserTypeSelection";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Dashboard from "@/pages/Dashboard";
 import ProviderDashboard from "@/pages/ProviderDashboard";
+import ServiceSelection from "@/pages/ServiceSelection";
+import BookingLocation from "@/pages/BookingLocation";
+import BookingDetails from "@/pages/BookingDetails";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +80,30 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProviderDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service/:category"
+        element={
+          <ProtectedRoute>
+            <ServiceSelection />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/book/:service/location"
+        element={
+          <ProtectedRoute>
+            <BookingLocation />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/book/:service/details"
+        element={
+          <ProtectedRoute>
+            <BookingDetails />
           </ProtectedRoute>
         }
       />
