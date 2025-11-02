@@ -1,13 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, User, DollarSign, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { usePendingBookings, useProviderBookings } from "@/hooks/useBookings";
+import { LogOut, User, DollarSign, TrendingUp, Clock } from "lucide-react";
 
 export default function ProviderDashboard() {
   const [isOnline, setIsOnline] = useState(false);
   const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { data: pendingBookings } = usePendingBookings();
+  const { data: bookings } = useProviderBookings();
+
+  const todayEarnings = bookings?.filter((b: any) => {
+    const today = new Date().toDateString();
+    return new Date(b.completed_at || b.created_at).toDateString() === today && b.status === "completed";
+  }).reduce((sum: number, b: any) => sum + (Number(b.final_price) || 0), 0) || 0;
+
+  const totalTrips = bookings?.filter((b: any) => b.status === "completed").length || 0;
+  const avgRating = 4.8; // Placeholder - would calculate from ratings table
+
+  const activeBooking = bookings?.find((b: any) => 
+    b.status === "accepted" || b.status === "in_progress"
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/10 via-background to-primary/10">
@@ -50,7 +67,7 @@ export default function ProviderDashboard() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Today's Earnings</p>
-                  <p className="text-2xl font-bold">$0.00</p>
+                  <p className="text-2xl font-bold">${todayEarnings.toFixed(2)}</p>
                 </div>
               </div>
             </Card>
@@ -62,7 +79,7 @@ export default function ProviderDashboard() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Trips</p>
-                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-2xl font-bold">{totalTrips}</p>
                 </div>
               </div>
             </Card>
@@ -74,18 +91,62 @@ export default function ProviderDashboard() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Rating</p>
-                  <p className="text-2xl font-bold">0.00</p>
+                  <p className="text-2xl font-bold">⭐ {avgRating}</p>
                 </div>
               </div>
             </Card>
           </div>
 
-          <Card className="p-8 text-center">
-            <h3 className="text-xl font-semibold mb-2">No Active Requests</h3>
-            <p className="text-muted-foreground">
-              Turn online to start receiving service requests
-            </p>
-          </Card>
+          {activeBooking ? (
+            <Card className="p-6 mb-6">
+              <h3 className="text-xl font-semibold mb-4">Active Service</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Service</span>
+                  <span className="font-medium">{activeBooking.service_categories?.name}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Status</span>
+                  <span className="font-medium capitalize">{activeBooking.status.replace("_", " ")}</span>
+                </div>
+                <Button
+                  onClick={() => navigate(`/provider/service/${activeBooking.id}`)}
+                  className="w-full gradient-primary text-white mt-4"
+                >
+                  View Details
+                </Button>
+              </div>
+            </Card>
+          ) : null}
+
+          {isOnline && pendingBookings && pendingBookings.length > 0 ? (
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold">Available Requests</h3>
+                <span className="px-3 py-1 bg-secondary/20 text-secondary rounded-full text-sm font-medium">
+                  {pendingBookings.length} new
+                </span>
+              </div>
+              <Button
+                onClick={() => navigate("/provider/requests")}
+                className="w-full gradient-secondary text-white"
+              >
+                <Clock className="w-5 h-5 mr-2" />
+                View Requests
+              </Button>
+            </Card>
+          ) : (
+            <Card className="p-8 text-center">
+              <h3 className="text-xl font-semibold mb-2">
+                {isOnline ? "No Active Requests" : "You're Offline"}
+              </h3>
+              <p className="text-muted-foreground">
+                {isOnline
+                  ? "New service requests will appear here"
+                  : "Turn online to start receiving service requests"}
+              </p>
+            </Card>
+          )}
         </div>
       </main>
     </div>

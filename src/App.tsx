@@ -10,9 +10,12 @@ import UserTypeSelection from "@/pages/UserTypeSelection";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Dashboard from "@/pages/Dashboard";
 import ProviderDashboard from "@/pages/ProviderDashboard";
+import ProviderRequests from "@/pages/ProviderRequests";
+import ProviderActiveService from "@/pages/ProviderActiveService";
 import ServiceSelection from "@/pages/ServiceSelection";
 import BookingLocation from "@/pages/BookingLocation";
 import BookingDetails from "@/pages/BookingDetails";
+import ActiveService from "@/pages/ActiveService";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +87,22 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/provider/requests"
+        element={
+          <ProtectedRoute>
+            <ProviderRequests />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/provider/service/:id"
+        element={
+          <ProtectedRoute>
+            <ProviderActiveService />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/service/:category"
         element={
           <ProtectedRoute>
@@ -104,6 +123,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <BookingDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service/:id/active"
+        element={
+          <ProtectedRoute>
+            <ActiveService />
           </ProtectedRoute>
         }
       />
