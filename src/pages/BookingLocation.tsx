@@ -1,25 +1,30 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { LocationPicker } from "@/components/LocationPicker";
+import { MapView } from "@/components/MapView";
 
 export default function BookingLocation() {
   const { service } = useParams();
   const navigate = useNavigate();
-  const [pickupAddress, setPickupAddress] = useState("");
-  const [dropoffAddress, setDropoffAddress] = useState("");
+  const [pickup, setPickup] = useState({ address: "", coords: { lat: 0, lng: 0 } });
+  const [dropoff, setDropoff] = useState({ address: "", coords: { lat: 0, lng: 0 } });
 
   const handleContinue = () => {
-    if (!pickupAddress) {
+    if (!pickup.address) {
       toast.error("Please enter pickup location");
       return;
     }
 
     navigate(`/book/${service}/details`, {
-      state: { pickupAddress, dropoffAddress },
+      state: { 
+        pickupAddress: pickup.address,
+        pickupCoords: pickup.coords,
+        dropoffAddress: dropoff.address,
+        dropoffCoords: dropoff.coords
+      },
     });
   };
 
@@ -34,35 +39,27 @@ export default function BookingLocation() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="bg-card p-8 rounded-xl border space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="pickup">Pickup Location *</Label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-              <Input
-                id="pickup"
-                placeholder="Enter pickup address"
-                value={pickupAddress}
-                onChange={(e) => setPickupAddress(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <MapView 
+          pickup={pickup.coords.lat !== 0 ? { ...pickup.coords, address: pickup.address } : undefined}
+          dropoff={dropoff.coords.lat !== 0 ? { ...dropoff.coords, address: dropoff.address } : undefined}
+          showRoute={!!pickup.address && !!dropoff.address}
+        />
 
-          <div className="space-y-2">
-            <Label htmlFor="dropoff">Drop-off Location {service !== "errands" && "*"}</Label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-              <Input
-                id="dropoff"
-                placeholder="Enter drop-off address"
-                value={dropoffAddress}
-                onChange={(e) => setDropoffAddress(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+        <div className="bg-card p-8 rounded-xl border space-y-6">
+          <LocationPicker
+            label="Pickup Location *"
+            value={pickup.address}
+            onChange={(address, coords) => setPickup({ address, coords })}
+            placeholder="Enter pickup address"
+          />
+
+          <LocationPicker
+            label={`Drop-off Location ${service !== "errands" ? "*" : ""}`}
+            value={dropoff.address}
+            onChange={(address, coords) => setDropoff({ address, coords })}
+            placeholder="Enter drop-off address"
+          />
 
           <Button
             onClick={handleContinue}

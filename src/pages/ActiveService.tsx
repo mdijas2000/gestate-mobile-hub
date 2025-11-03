@@ -6,6 +6,7 @@ import { ArrowLeft, Phone, MessageSquare, Navigation, AlertCircle } from "lucide
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { MapView } from "@/components/MapView";
 
 export default function ActiveService() {
   const { id } = useParams();
@@ -104,6 +105,22 @@ export default function ActiveService() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <MapView 
+          pickup={{ 
+            lat: booking.pickup_latitude || 0, 
+            lng: booking.pickup_longitude || 0, 
+            address: booking.pickup_address || "Pickup" 
+          }}
+          dropoff={booking.dropoff_address ? { 
+            lat: booking.dropoff_latitude || 0, 
+            lng: booking.dropoff_longitude || 0, 
+            address: booking.dropoff_address 
+          } : undefined}
+          currentLocation={{ lat: 0, lng: 0 }}
+          showRoute={true}
+          height="300px"
+        />
+
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">{booking.service_categories?.name}</h2>
