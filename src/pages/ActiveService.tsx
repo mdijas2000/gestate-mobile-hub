@@ -32,7 +32,7 @@ export default function ActiveService() {
           setBooking(payload.new);
           if (payload.new.status === "completed") {
             toast.success("Service completed!");
-            navigate(`/service/${id}/complete`);
+            setTimeout(() => navigate(`/service/${id}/complete`), 1000);
           }
         }
       )

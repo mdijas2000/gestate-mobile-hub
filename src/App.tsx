@@ -12,10 +12,14 @@ import Dashboard from "@/pages/Dashboard";
 import ProviderDashboard from "@/pages/ProviderDashboard";
 import ProviderRequests from "@/pages/ProviderRequests";
 import ProviderActiveService from "@/pages/ProviderActiveService";
+import ProviderEarnings from "@/pages/ProviderEarnings";
 import ServiceSelection from "@/pages/ServiceSelection";
 import BookingLocation from "@/pages/BookingLocation";
 import BookingDetails from "@/pages/BookingDetails";
 import ActiveService from "@/pages/ActiveService";
+import RatingPayment from "@/pages/RatingPayment";
+import ServiceHistory from "@/pages/ServiceHistory";
+import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -131,6 +135,38 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ActiveService />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service/:id/complete"
+        element={
+          <ProtectedRoute>
+            <RatingPayment />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <ServiceHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/provider/earnings"
+        element={
+          <ProtectedRoute>
+            <ProviderEarnings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />

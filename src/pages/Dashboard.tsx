@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Bike, Package, ShoppingCart, Truck, LogOut, User } from "lucide-react";
+import { useCustomerBookings } from "@/hooks/useBookings";
+import { Bike, Package, ShoppingCart, Truck, LogOut, User, History } from "lucide-react";
 
 interface ServiceCategory {
   id: string;
@@ -20,6 +21,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { data: bookings } = useCustomerBookings();
+
+  const activeBooking = bookings?.find(
+    (b: any) => b.status === "in_progress" || b.status === "accepted"
+  );
 
   useEffect(() => {
     fetchServices();
@@ -70,17 +76,31 @@ export default function Dashboard() {
             Deli-Ride
           </h1>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <User className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/history")}>
+              <History className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={signOut}>
-              <LogOut className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/profile")}>
+              <User className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {activeBooking && (
+          <Card className="p-6 gradient-primary text-white">
+            <h2 className="text-xl font-semibold mb-3">Active Service</h2>
+            <p className="mb-4">{activeBooking.service_categories?.name}</p>
+            <Button
+              variant="outline"
+              className="bg-white text-primary hover:bg-white/90"
+              onClick={() => navigate(`/service/${activeBooking.id}/active`)}
+            >
+              View Details
+            </Button>
+          </Card>
+        )}
+
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Welcome Back!</h2>
           <p className="text-muted-foreground">What service do you need today?</p>

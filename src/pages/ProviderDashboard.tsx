@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { usePendingBookings, useProviderBookings } from "@/hooks/useBookings";
-import { LogOut, User, DollarSign, TrendingUp, Clock } from "lucide-react";
+import { LogOut, User, DollarSign, TrendingUp, Clock, Wallet } from "lucide-react";
 
 export default function ProviderDashboard() {
   const [isOnline, setIsOnline] = useState(false);
@@ -34,11 +34,11 @@ export default function ProviderDashboard() {
             Deli-Ride Provider
           </h1>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <User className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/provider/earnings")}>
+              <Wallet className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={signOut}>
-              <LogOut className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/profile")}>
+              <User className="w-5 h-5" />
             </Button>
           </div>
         </div>
