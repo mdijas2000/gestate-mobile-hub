@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { ProviderNotifications } from "@/components/ProviderNotifications";
 
 import Welcome from "@/pages/Welcome";
 import Login from "@/pages/Login";
@@ -20,6 +21,8 @@ import ActiveService from "@/pages/ActiveService";
 import RatingPayment from "@/pages/RatingPayment";
 import ServiceHistory from "@/pages/ServiceHistory";
 import Profile from "@/pages/Profile";
+import Emergency from "@/pages/Emergency";
+import Support from "@/pages/Support";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,7 +46,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { user, loading, userRole } = useAuth();
 
   if (loading) {
     return (
@@ -54,10 +57,12 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Welcome />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-      <Route path="/verify-otp" element={<VerifyOTP />} />
+    <>
+      {userRole === "provider" && <ProviderNotifications />}
+      <Routes>
+        <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Welcome />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route
         path="/user-type"
         element={
@@ -170,8 +175,25 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/emergency"
+        element={
+          <ProtectedRoute>
+            <Emergency />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/support"
+        element={
+          <ProtectedRoute>
+            <Support />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { usePendingBookings, useProviderBookings } from "@/hooks/useBookings";
-import { LogOut, User, DollarSign, TrendingUp, Clock, Wallet } from "lucide-react";
+import { LogOut, User, DollarSign, TrendingUp, Clock, Wallet, HelpCircle } from "lucide-react";
 
 export default function ProviderDashboard() {
   const [isOnline, setIsOnline] = useState(false);
