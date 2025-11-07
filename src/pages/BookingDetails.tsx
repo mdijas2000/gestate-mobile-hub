@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useServiceCategories } from "@/hooks/useServiceCategories";
 import { toast } from "sonner";
-import { calculateDynamicPrice } from "@/lib/maps";
+import { calculateDynamicPrice, calculateSurgeMultiplier } from "@/lib/maps";
 import { Card } from "@/components/ui/card";
 
 export default function BookingDetails() {
@@ -23,14 +23,19 @@ export default function BookingDetails() {
   const { pickupAddress, pickupCoords, dropoffAddress, dropoffCoords, distance, duration } = location.state || {};
   const selectedService = services?.find((s) => s.category === service);
 
+  const surgeMultiplier = useMemo(() => {
+    return calculateSurgeMultiplier(pickupCoords);
+  }, [pickupCoords]);
+
   const dynamicPrice = useMemo(() => {
     if (!selectedService || !distance) return selectedService?.base_price || 0;
     return calculateDynamicPrice(
       Number(selectedService.base_price),
       Number(selectedService.price_per_km || 0),
-      distance
+      distance,
+      surgeMultiplier
     );
-  }, [selectedService, distance]);
+  }, [selectedService, distance, surgeMultiplier]);
 
   const handleCreateBooking = async () => {
     if (!user || !selectedService) {
@@ -136,6 +141,17 @@ export default function BookingDetails() {
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-muted-foreground">Distance Charge ({distance.toFixed(1)} km × ${selectedService.price_per_km}/km)</span>
                   <span>${(distance * Number(selectedService.price_per_km)).toFixed(2)}</span>
+                </div>
+              )}
+              {surgeMultiplier > 1 && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    Surge Pricing
+                    <span className="text-xs bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full">
+                      {surgeMultiplier}x
+                    </span>
+                  </span>
+                  <span className="text-accent-foreground font-medium">+{((surgeMultiplier - 1) * 100).toFixed(0)}%</span>
                 </div>
               )}
               <div className="pt-2 border-t flex justify-between items-center">

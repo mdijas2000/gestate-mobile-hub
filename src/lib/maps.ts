@@ -76,10 +76,50 @@ function toRad(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
 
+// High-demand area centers (example coordinates for major city centers)
+const HIGH_DEMAND_AREAS = [
+  { lat: 40.7128, lng: -74.0060, radius: 5 }, // New York
+  { lat: 34.0522, lng: -118.2437, radius: 5 }, // Los Angeles
+  { lat: 41.8781, lng: -87.6298, radius: 5 }, // Chicago
+  // Add more high-demand coordinates as needed
+];
+
+export function calculateSurgeMultiplier(
+  pickupCoords?: { lat: number; lng: number },
+  currentTime: Date = new Date()
+): number {
+  let multiplier = 1.0;
+  
+  // Time-based surge (peak hours)
+  const hour = currentTime.getHours();
+  const isPeakMorning = hour >= 7 && hour < 9;
+  const isPeakEvening = hour >= 17 && hour < 19;
+  
+  if (isPeakMorning || isPeakEvening) {
+    multiplier += 0.5; // 50% surge during peak hours
+  }
+  
+  // Location-based surge (high-demand areas)
+  if (pickupCoords) {
+    const isHighDemandArea = HIGH_DEMAND_AREAS.some(area => {
+      const distance = calculateStraightLineDistance(pickupCoords, area);
+      return distance <= area.radius;
+    });
+    
+    if (isHighDemandArea) {
+      multiplier += 0.3; // 30% surge in high-demand areas
+    }
+  }
+  
+  return Number(multiplier.toFixed(2));
+}
+
 export function calculateDynamicPrice(
   basePrice: number,
   pricePerKm: number,
-  distance: number
+  distance: number,
+  surgeMultiplier: number = 1.0
 ): number {
-  return Number((basePrice + pricePerKm * distance).toFixed(2));
+  const baseAmount = basePrice + pricePerKm * distance;
+  return Number((baseAmount * surgeMultiplier).toFixed(2));
 }
