@@ -1,16 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { LocationPicker } from "@/components/LocationPicker";
 import { MapView } from "@/components/MapView";
+import { calculateRoute } from "@/lib/maps";
+import { Card } from "@/components/ui/card";
 
 export default function BookingLocation() {
   const { service } = useParams();
   const navigate = useNavigate();
   const [pickup, setPickup] = useState({ address: "", coords: { lat: 0, lng: 0 } });
   const [dropoff, setDropoff] = useState({ address: "", coords: { lat: 0, lng: 0 } });
+  const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number; distanceText: string; durationText: string } | null>(null);
+  const [calculating, setCalculating] = useState(false);
+
+  useEffect(() => {
+    const calculateRouteInfo = async () => {
+      if (pickup.coords.lat !== 0 && dropoff.coords.lat !== 0) {
+        setCalculating(true);
+        const info = await calculateRoute(pickup.coords, dropoff.coords);
+        setRouteInfo(info);
+        setCalculating(false);
+      } else {
+        setRouteInfo(null);
+      }
+    };
+
+    calculateRouteInfo();
+  }, [pickup.coords, dropoff.coords]);
 
   const handleContinue = () => {
     if (!pickup.address) {
@@ -23,7 +42,9 @@ export default function BookingLocation() {
         pickupAddress: pickup.address,
         pickupCoords: pickup.coords,
         dropoffAddress: dropoff.address,
-        dropoffCoords: dropoff.coords
+        dropoffCoords: dropoff.coords,
+        distance: routeInfo?.distance || 0,
+        duration: routeInfo?.duration || 0
       },
     });
   };
@@ -60,6 +81,33 @@ export default function BookingLocation() {
             onChange={(address, coords) => setDropoff({ address, coords })}
             placeholder="Enter drop-off address"
           />
+
+          {routeInfo && !calculating && (
+            <Card className="p-4 bg-secondary/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Distance</p>
+                    <p className="font-semibold">{routeInfo.distanceText}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">ETA</p>
+                    <p className="font-semibold">{routeInfo.durationText}</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {calculating && (
+            <Card className="p-4 bg-secondary/10">
+              <p className="text-sm text-muted-foreground text-center">Calculating route...</p>
+            </Card>
+          )}
 
           <Button
             onClick={handleContinue}
